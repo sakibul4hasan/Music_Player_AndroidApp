@@ -2,16 +2,18 @@ package com.example.homework2472;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -22,7 +24,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class DashboardActivity extends AppCompatActivity {
 
@@ -81,106 +82,71 @@ public class DashboardActivity extends AppCompatActivity {
             ImageView artistIMG = myView.findViewById(R.id.artistIMG);
             TextView artistName = myView.findViewById(R.id.artistName);
             TextView artistDes = myView.findViewById(R.id.artistDes);
-            LinearLayout lly = myView.findViewById(R.id.lly);
+            LinearLayout albumlly = myView.findViewById(R.id.albumlly);
             ////////id end///////
 
 
             hashMap = arrayList.get(position);
 
-            String aIMG = hashMap.get("img");
+            String artistImg = hashMap.get("img");
             String aName = hashMap.get("name");
             String aDes = hashMap.get("des");
 
             //////////add data//////
-            Picasso.get().load(aIMG).placeholder(R.drawable.img).into(artistIMG);
+            Picasso.get().load(artistImg).placeholder(R.drawable.load).into(artistIMG);
             artistName.setText(aName);
             artistDes.setText(aDes);
             //////add data end//////
 
             /////////////////new activity///////////////
-            if (aName.contains("Arijit Singh")){
-                lly.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+            albumlly.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //
+                    if (aName.contains("Arijit Singh")){
 
-                        Bitmap bitmap = ( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
-                        SongListActivity.bitmap = bitmap;
-                        SongListActivity.bitmap2 = bitmap;
-                        SongListActivity.aTopName = aName;
-                        SongListActivity.SingerName = aName;
-                        SongListActivity.main_arrayList = SongListActivity.Arjit_list;
+                        SongListActivity.singerTopName = aName;
+                        Bitmap bitmap =( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
+                        SongListActivity.MY_BITMAP = bitmap;
+
+                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
+
+                    } else if (aName.contains("Atif Aslam")) {
+
+                        SongListActivity.singerTopName = aName;
+                        Bitmap bitmap =( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
+                        SongListActivity.MY_BITMAP = bitmap;
+
+                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
+
+                    }else if (aName.contains("Jubin Nautiyal")) {
+
+                        SongListActivity.singerTopName = aName;
+                        Bitmap bitmap =( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
+                        SongListActivity.MY_BITMAP = bitmap;
+
+                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
+
+                    }else if (aName.contains("Imran Khan")) {
+
+                        SongListActivity.singerTopName = aName;
+                        Bitmap bitmap =( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
+                        SongListActivity.MY_BITMAP = bitmap;
+
+                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
+
+                    }else if (aName.contains("Javed Ali")) {
+
+                        SongListActivity.singerTopName = aName;
+                        Bitmap bitmap =( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
+                        SongListActivity.MY_BITMAP = bitmap;
+
                         startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
 
                     }
-                });
-            }
-            //
-            if (aName.contains("Atif Aslam")){
-                lly.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        Bitmap bitmap = ( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
-                        SongListActivity.bitmap = bitmap;
-                        SongListActivity.bitmap2 = bitmap;
-                        SongListActivity.aTopName = aName;
-                        SongListActivity.SingerName = aName;
-                        SongListActivity.main_arrayList = SongListActivity.Atif_list;
-                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
-
-                    }
-                });
-            }
-            //
-            if (aName.contains("Jubin Nautiyal")){
-                lly.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        Bitmap bitmap = ( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
-                        SongListActivity.bitmap = bitmap;
-                        SongListActivity.bitmap2 = bitmap;
-                        SongListActivity.aTopName = aName;
-                        SongListActivity.SingerName = aName;
-                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
-
-                    }
-                });
-            }
-            //
-            if (aName.contains("Imran Khan")){
-                lly.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        Bitmap bitmap = ( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
-                        SongListActivity.bitmap = bitmap;
-                        SongListActivity.bitmap2 = bitmap;
-                        SongListActivity.aTopName = aName;
-                        SongListActivity.SingerName = aName;
-                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
-
-                    }
-                });
-            }
-            //
-            if (aName.contains("Javed Ali")){
-                lly.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-
-                        Bitmap bitmap = ( (BitmapDrawable) artistIMG.getDrawable() ).getBitmap();
-                        SongListActivity.bitmap = bitmap;
-                        SongListActivity.bitmap2 = bitmap;
-                        SongListActivity.aTopName = aName;
-                        SongListActivity.SingerName = aName;
-                        startActivity(new Intent(DashboardActivity.this, SongListActivity.class));
-
-                    }
-                });
-            }
-            //
-
+                    //
+                }
+            });
             /////////////////new activity end///////////
 
             return myView;
@@ -228,6 +194,47 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     //hasmap mathod end===============================================
+
+
+
+
+
+
+
+
+
+    ///custom exit dialog================
+
+    @Override
+    public void onBackPressed() {
+        //super.onBackPressed();
+        Dialog dialog = new Dialog(DashboardActivity.this);
+        dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        dialog.getWindow().getAttributes().windowAnimations
+                = android.R.style.Animation_Dialog;
+        dialog.setContentView(R.layout.exitdialog);
+
+        ImageView nobtn = dialog.findViewById(R.id.no);
+        ImageView yesbtn = dialog.findViewById(R.id.yes);
+        nobtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        yesbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        dialog.show();
+    }
+
+    ///custom exit dialog end============
+    ///custom exit dialog end============
 
 
 }

@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -15,61 +15,65 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Random;
 
 public class SongListActivity extends AppCompatActivity {
 
     TextView artistTopname;
     ImageView artistIMG;
-    public static String aTopName = "";
-    public static String SingerName = "";
-    public static Bitmap bitmap = null;
-    public static Bitmap bitmap2 = null;
+    public static String singerTopName ="";
+    public static Bitmap MY_BITMAP = null;
     ListView listView;
-    static HashMap <String, String> hashMap;
-    static ArrayList < HashMap <String, String> > main_arrayList = new ArrayList<>();
-    static ArrayList < HashMap <String, String> > Arjit_list = new ArrayList<>();
-    static ArrayList < HashMap <String, String> > Atif_list = new ArrayList<>();
+    HashMap<String, String> hashMap;
+    ArrayList< HashMap<String, String> > arrayList = new ArrayList<>();
     MediaPlayer mediaPlayer;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list);
-        listView = findViewById(R.id.listView);
         artistTopname = findViewById(R.id.artistTopname);
         artistIMG = findViewById(R.id.artistIMG);
+        listView = findViewById(R.id.listView);
+
+        ////////////////////////////////////////////////////////////////////
+
+        ///java code hear==============
+        artistTopname.setText(singerTopName);
+        if (MY_BITMAP!=null)
+            artistIMG.setImageBitmap(MY_BITMAP);
 
 
-
-        ////////////////////////////////////////////////////////////////////////////
-
-        artistTopname.setText(aTopName);
-        if (bitmap!=null) artistIMG.setImageBitmap(bitmap);
-
-
-        Main_arrylist();
+        if (singerTopName.contains("Arijit Singh")){
+          arijitList();
+        } else if (singerTopName.contains("Atif Aslam")) {
+            atifList();
+        }else if (singerTopName.contains("Jubin Nautiyal")) {
+            jubinList();
+        }else if (singerTopName.contains("Imran Khan")) {
+            imranList();
+        }else if (singerTopName.contains("Javed Ali")) {
+            javedList();
+        }
         myAdaptar adaptar = new myAdaptar();
         listView.setAdapter(adaptar);
 
 
 
 
-    }//////////////////////////////////////////////////////////////////////////
 
+    }///////////////////////////////////////////////////////////////////////
 
-    //listview custom adapter=========================================
-
+    ////listView create Adaptar============================
     public class myAdaptar extends BaseAdapter{
 
         @Override
         public int getCount() {
-            return main_arrayList.size();
+            return arrayList.size();
         }
 
         @Override
@@ -85,254 +89,546 @@ public class SongListActivity extends AppCompatActivity {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
 
-
             LayoutInflater layoutInflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             View myView = layoutInflater.inflate(R.layout.song_list, parent, false);
 
-            ////////ID//////////
+            hashMap = arrayList.get(position);
+            //Id=============
+            LinearLayout Song_lly = myView.findViewById(R.id.Song_lly);
             ImageView artistIMG = myView.findViewById(R.id.artistIMG);
+            ImageView player = myView.findViewById(R.id.player);
             TextView songName = myView.findViewById(R.id.songName);
             TextView artistName = myView.findViewById(R.id.artistName);
-            LinearLayout lly = myView.findViewById(R.id.lly);
-            ImageView player = myView.findViewById(R.id.player);
-            ////////ID end//////
-
-            //////random color/////////
-            Random rnd = new Random();
-            int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
-            lly.setBackgroundColor(color);
-            //////random color end/////
+            //Id end=========
+            //Id end=========
 
 
-            hashMap = main_arrayList.get(position);
-            //convert hash to string//////////////
-            String title = hashMap.get("Title");
-            String Load_song = hashMap.get("s_url");
-            //convert hash to string end//////////
 
-            //add data///////////////////
-            if (bitmap2!=null) artistIMG.setImageBitmap(bitmap2);
-            songName.setText(title);
-            artistName.setText(SingerName);
-
-            if (position==0){
-                player.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        songPlay(Load_song);
-                    }
-                });
-            }
+            //add data====================
+            String SongName = hashMap.get("songName");
+            String song = hashMap.get("songUrl");
             //
-            if (position==1){
-                player.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        songPlay(Load_song);
-                    }
-                });
-            }
-            //
-            if (position==2){
-                player.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        songPlay(Load_song);
-                    }
-                });
-            }
-            //
-            if (position==3){
-                player.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        songPlay(Load_song);
-                    }
-                });
-            }
-            //
-            if (position==4){
-                player.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        songPlay(Load_song);
-                    }
-                });
-            }
+
+            artistName.setText(singerTopName);
+            songName.setText(SongName);
+            if (MY_BITMAP!=null)
+                artistIMG.setImageBitmap(MY_BITMAP);
+
+            //music add
+            player.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //
+                    if (player.getTag()!=null && player.getTag().toString().contains("NOT_PLAYING")) {
+
+                        if (mediaPlayer!=null)
+                            mediaPlayer.release();
 
 
-            //add data end///////////////
+                        String audioUrl = song;
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+                        try {
+
+                            mediaPlayer.setDataSource(audioUrl);
+
+                            // below line is use to prepare
+                            // and start our media player.
+
+                            mediaPlayer.prepare();
+                            mediaPlayer.start();
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+
+
+                        // below line is use to display a toast message.
+                        Toast.makeText(SongListActivity.this, ""+SongName+" is playing", Toast.LENGTH_SHORT).show();
+
+
+                        player.setTag("NOW_PLAYING");
+                        player.setImageResource(R.drawable.pause);
+
+                        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                            @Override
+                            public void onCompletion(MediaPlayer mp) {
+
+                                player.setTag("NOT_PLAYING");
+                                player.setImageResource(R.drawable.play);
+                            }
+                        });
+
+
+                    } else {
+
+                        if (mediaPlayer!=null) mediaPlayer.release();
+                        player.setImageResource(R.drawable.play);
+                        player.setTag("NOT_PLAYING");
+                    }
+                    //
+                }
+            });
+            //add data end================
+            //add data end================
+
 
             return myView;
         }
     }
-
-    //listview custom adapter end=====================================
-
-
+    ////listView create Adaptar end========================
+    ////listView create Adaptar end========================
 
 
-    //Hasmap method=====================================
 
-    public static void Main_arrylist (){
 
-        main_arrayList = new ArrayList<>();
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        main_arrayList.add(hashMap);
+    ///create a arrylist===============================
+    public void arijitList (){
         //
         hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        main_arrayList.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        main_arrayList.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        main_arrayList.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        main_arrayList.add(hashMap);
-        //
+        hashMap.put("songName", "Pata chala ");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
+        arrayList.add(hashMap);
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Hamdard (Ek Villain)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Zaalima (Raees)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Mast Magan (2 States)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Muskurane (CityLights)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Tum Hi Ho (Aashiqui 2)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Soch Na Sake (Airlift)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Sooiyan (Guddu Rangeela)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Samjhawan (Humpty Sharma Ki Dulhania)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Kabhi Jo Baadal Barse (Jackpot)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Laal Ishq (Goliyon Ki Rasleela Ram-Leela)");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
+        arrayList.add(hashMap);
+        //
     }
 
-    //Hasmap method end=================================
+    //
 
-    //2nd
-    //Hasmap method=====================================
+    public void atifList (){
+        //
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Pata chala ");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI0Nzhf/Borsha%20Chokh%20Bangla%20Music%20Video%20By%20Imran.mp3");
+        arrayList.add(hashMap);
 
-    public static void Arjit_album_song (){
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Hamdard (Ek Villain)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
-        Arjit_list = new ArrayList<>();
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI0ODRf/Bulleya_Ae_Dil_Hai_Mushkil.mp3");
-        Arjit_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Arjit_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Arjit_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Arjit_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Arjit_list.add(hashMap);
-        //
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Zaalima (Raees)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Mast Magan (2 States)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Muskurane (CityLights)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Tum Hi Ho (Aashiqui 2)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Soch Na Sake (Airlift)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Sooiyan (Guddu Rangeela)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Samjhawan (Humpty Sharma Ki Dulhania)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Kabhi Jo Baadal Barse (Jackpot)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Laal Ishq (Goliyon Ki Rasleela Ram-Leela)");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI0Nzhf/Borsha%20Chokh%20Bangla%20Music%20Video%20By%20Imran.mp3");
+        arrayList.add(hashMap);
+        //
     }
 
-    //Hasmap method end=================================
+    //
 
-    //3rd////
-    //Hasmap method=====================================
+    public void jubinList (){
+        //
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Pata chala ");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI0ODRf/Bulleya%20Ae%20Dil%20Hai%20Mushkil.mp3");
+        arrayList.add(hashMap);
 
-    public static void Atif_album_song (){
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Hamdard (Ek Villain)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
-        Atif_list = new ArrayList<>();
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc2MzU3Njdf/World%20Best%20Ringtone.mp3");
-        Atif_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Atif_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Atif_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Atif_list.add(hashMap);
-        //
-        hashMap = new HashMap<>();
-        hashMap.put("Title", "song title");
-        hashMap.put("s_url", "https://od.lk/s/NTNfMjc4MTI1MjVf/Chhod%20Diya%20%28Lyrics%29%20-%20Arijit%20Singh_%20Kanika%20Kapoor%20_%20Baazaar.mp3");
-        Atif_list.add(hashMap);
-        //
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Zaalima (Raees)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Mast Magan (2 States)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Muskurane (CityLights)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Tum Hi Ho (Aashiqui 2)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Soch Na Sake (Airlift)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Sooiyan (Guddu Rangeela)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Samjhawan (Humpty Sharma Ki Dulhania)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Kabhi Jo Baadal Barse (Jackpot)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Laal Ishq (Goliyon Ki Rasleela Ram-Leela)");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc4MTI0ODRf/Bulleya%20Ae%20Dil%20Hai%20Mushkil.mp3");
+        arrayList.add(hashMap);
+        //
     }
 
-    //Hasmap method end=================================
+    //
+
+    public void imranList (){
+        //
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Pata chala ");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc2NDU3NzVf/falakh.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Hamdard (Ek Villain)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Zaalima (Raees)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
 
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Mast Magan (2 States)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
 
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Muskurane (CityLights)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
 
 
-
-    /////////////////////////////////////////////////////
-    //song play method////////////////////////////////////
-
-    public void songPlay (String song_url){
-
-        ImageView player = (ImageView)findViewById(R.id.player);
-
-        if (player.getTag()!=null && player.getTag().toString().contains("NOT PLAYING")){
-
-
-            if (mediaPlayer!=null) mediaPlayer.release();
-            mediaPlayer = new MediaPlayer();
-            try {
-                mediaPlayer.setDataSource(song_url);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-                player.setImageResource(R.drawable.pause);
-                player.setTag("PLAYING NOW");
-                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                    @Override
-                    public void onCompletion(MediaPlayer mp) {
-                        player.setImageResource(R.drawable.play);
-                        player.setTag("NOT PLAYING");
-                    }
-                });
-
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-
-
-        }else {
-            if (mediaPlayer!=null) mediaPlayer.release();
-            player.setImageResource(R.drawable.play);
-            player.setTag("NOT PLAYING");
-        }
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Tum Hi Ho (Aashiqui 2)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
 
 
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Soch Na Sake (Airlift)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
 
 
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Sooiyan (Guddu Rangeela)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Samjhawan (Humpty Sharma Ki Dulhania)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Kabhi Jo Baadal Barse (Jackpot)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Laal Ishq (Goliyon Ki Rasleela Ram-Leela)");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc2NDU3NzVf/falakh.mp3");
+        arrayList.add(hashMap);
+        //
     }
 
-    //song play method end////////////////////////////////
+    //
 
+    public void javedList (){
+        //
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Pata chala ");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc2MzU3NjFf/ummon%20hiyonat%20ringtone.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Hamdard (Ek Villain)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Gerua (Dilwale)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Zaalima (Raees)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Mast Magan (2 States)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Muskurane (CityLights)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Tum Hi Ho (Aashiqui 2)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Soch Na Sake (Airlift)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Sooiyan (Guddu Rangeela)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Samjhawan (Humpty Sharma Ki Dulhania)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", " Kabhi Jo Baadal Barse (Jackpot)");
+        hashMap.put("songUrl", "https://freetestdata.com/wp-content/uploads/2021/09/Free_Test_Data_100KB_MP3.mp3");
+        arrayList.add(hashMap);
+
+
+
+        hashMap = new HashMap<>();
+        hashMap.put("songName", "Laal Ishq (Goliyon Ki Rasleela Ram-Leela)");
+        hashMap.put("songUrl", "https://od.lk/s/NTNfMjc2MzU3NjFf/ummon%20hiyonat%20ringtone.mp3");
+        arrayList.add(hashMap);
+        //
+    }
+    ///create a arrylist end===========================
+    ///create a arrylist end===========================
 
 
 }
