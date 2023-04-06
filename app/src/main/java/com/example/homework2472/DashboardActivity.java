@@ -9,6 +9,8 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +43,38 @@ public class DashboardActivity extends AppCompatActivity {
 
 
         //////////////////////////////////////////////////////////////////////////
+
+
+
+
+        if (!CheckInternet()){
+
+            Dialog dialog = new Dialog(DashboardActivity.this);
+            dialog.getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().getAttributes().windowAnimations
+                    = android.R.style.Animation_Dialog;
+
+            dialog.setContentView(R.layout.no_internet);
+            dialog.setCancelable(false);
+            ImageView retry;
+            retry = dialog.findViewById(R.id.retry);
+
+            retry.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    recreate();
+                }
+            });
+            dialog.show();
+
+        }
+
+
+
+
+
+
 
 
         createTable();
@@ -197,6 +231,22 @@ public class DashboardActivity extends AppCompatActivity {
 
 
 
+
+
+
+    ///////==========================================
+    private boolean CheckInternet(){
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if (networkInfo==null || !networkInfo.isAvailable() || !networkInfo.isConnected()){
+            return false;
+        }
+        return true;
+
+    }
+
+    //
 
 
 
